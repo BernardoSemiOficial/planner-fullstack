@@ -1,8 +1,9 @@
-import dayjs from "dayjs";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
+import { dayjs } from "../lib/dayjs";
 import { EmailTemplates, sendEmail } from "../lib/nodemailer";
+import { prisma } from "../lib/prisma";
 
 export async function createTrip(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -45,20 +46,31 @@ export async function createTrip(app: FastifyInstance) {
         email,
       }));
 
-      // const trip = await prisma.trip.create({
-      //   data: {
-      //     starts_at,
-      //     ends_at,
-      //     destination,
-      //     participants: {
-      //       createMany: {
-      //         data: [ownerParticipant, ...participantsFormatted],
-      //       },
-      //     },
-      //   },
-      // });
+      const trip = await prisma.trip.create({
+        data: {
+          starts_at,
+          ends_at,
+          destination,
+          participants: {
+            createMany: {
+              data: [ownerParticipant, ...participantsFormatted],
+            },
+          },
+        },
+      });
 
-      await sendEmail(EmailTemplates.Invite);
+      const confirmLink = trip?.id
+        ? `http://localhost:3000/trips/${trip.id}/confirm`
+        : "";
+      const startsAt = dayjs(starts_at).format("LL");
+      const endsAt = dayjs(ends_at).format("LL");
+
+      await sendEmail(EmailTemplates.Invite, {
+        destination,
+        starts_at: startsAt,
+        ends_at: endsAt,
+        confirm_link: confirmLink,
+      });
 
       // return reply.status(201).send(trip);
     }
