@@ -2,6 +2,10 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
+import dayjs from "dayjs";
+import { EmailTemplates, sendEmail } from "../lib/nodemailer";
+import { libPrisma } from "../lib/prisma";
+
 export async function confirmTrip(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get(
     "/trips/:tripId/confirm",
@@ -14,6 +18,58 @@ export async function confirmTrip(app: FastifyInstance) {
     },
     async (request, reply) => {
       const tripId = request.params.tripId;
+
+      const trip = await libPrisma.trip.findUnique({
+        where: {
+          id: tripId,
+        },
+        include: {
+          participants: {
+            where: {
+              is_owner: false,
+            },
+          },
+        },
+      });
+
+      if (!trip) {
+        return reply.status(404).send({ message: "Trip not found" });
+      }
+
+      if (trip.is_confirmed) {
+        return reply.status(400).send({ message: "Trip already confirmed" });
+      }
+
+      await libPrisma.trip.update({
+        where: {
+          id: tripId,
+        },
+        data: {
+          is_confirmed: true,
+        },
+      });
+
+      const startsAt = dayjs(trip.starts_at).format("LL");
+      const endsAt = dayjs(trip.ends_at).format("LL");
+
+      await Promise.all([
+        ...trip.participants.map(async (participant) => {
+          const confirmLink = trip?.id
+            ? `http://localhost:3000/trips/${trip.id}/participant/${participant.id}/confirm`
+            : "";
+          await sendEmail(
+            EmailTemplates.ConfirmParticipant,
+            participant.email,
+            {
+              destination: trip.destination,
+              starts_at: startsAt,
+              ends_at: endsAt,
+              confirm_link: confirmLink,
+            }
+          );
+        }),
+      ]);
+
       return reply.status(200).send({ tripId });
     }
   );

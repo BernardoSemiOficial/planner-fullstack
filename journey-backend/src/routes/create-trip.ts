@@ -1,9 +1,10 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
-import { dayjs } from "../lib/dayjs";
+
+import { libDayjs } from "../lib/dayjs";
 import { EmailTemplates, sendEmail } from "../lib/nodemailer";
-import { prisma } from "../lib/prisma";
+import { libPrisma } from "../lib/prisma";
 
 export async function createTrip(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -29,10 +30,10 @@ export async function createTrip(app: FastifyInstance) {
         owner_email,
         owner_name,
       } = request.body;
-      if (dayjs(starts_at).isAfter(dayjs(ends_at))) {
+      if (libDayjs(starts_at).isAfter(libDayjs(ends_at))) {
         throw new Error("Start date cannot be after end date");
       }
-      if (dayjs(starts_at).isBefore(dayjs())) {
+      if (libDayjs(starts_at).isBefore(libDayjs())) {
         throw new Error("Start date cannot be in the past");
       }
 
@@ -46,7 +47,7 @@ export async function createTrip(app: FastifyInstance) {
         email,
       }));
 
-      const trip = await prisma.trip.create({
+      const trip = await libPrisma.trip.create({
         data: {
           starts_at,
           ends_at,
@@ -62,17 +63,24 @@ export async function createTrip(app: FastifyInstance) {
       const confirmLink = trip?.id
         ? `http://localhost:3000/trips/${trip.id}/confirm`
         : "";
-      const startsAt = dayjs(starts_at).format("LL");
-      const endsAt = dayjs(ends_at).format("LL");
+      const startsAt = libDayjs(starts_at).format("LL");
+      const endsAt = libDayjs(ends_at).format("LL");
 
-      await sendEmail(EmailTemplates.Invite, {
-        destination,
-        starts_at: startsAt,
-        ends_at: endsAt,
-        confirm_link: confirmLink,
-      });
+      await sendEmail(
+        EmailTemplates.Invite,
+        {
+          address: "user@gmail.com",
+          name: "Joãozinho da Silva",
+        },
+        {
+          destination,
+          starts_at: startsAt,
+          ends_at: endsAt,
+          confirm_link: confirmLink,
+        }
+      );
 
-      // return reply.status(201).send(trip);
+      return reply.status(201).send(trip);
     }
   );
 }

@@ -4,7 +4,7 @@ import path from "path";
 
 export enum EmailTemplates {
   Invite = "invite.html",
-  Confirm = "confirm.html",
+  ConfirmParticipant = "confirm-participant.html",
 }
 
 const basePathTemplates = "src/templates/emails/";
@@ -38,6 +38,7 @@ function renderTemplate(
 
 export const sendEmail = async (
   templateName: string,
+  to: { address: string; name: string } | string,
   variables: Record<string, string>
 ) => {
   // const template = fs.readFileSync(basePathTemplates + templateName);
@@ -49,10 +50,7 @@ export const sendEmail = async (
       address: "bernardo.258@hotmail.com",
       name: "Bernardo Pereira",
     },
-    to: {
-      address: "user@gmail.com",
-      name: "Joãozinho da Silva",
-    },
+    to,
     html: template,
   });
 
