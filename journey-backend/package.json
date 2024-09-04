@@ -4,6 +4,7 @@
   "description": "The backend of the Journey project",
   "main": "index.js",
   "scripts": {
+    "server:build": "tsc",
     "server:watch": "tsx --watch src/server.ts",
     "prisma:studio": "prisma studio"
   },
