@@ -30,9 +30,11 @@ export async function createTrip(app: FastifyInstance) {
         owner_email,
         owner_name,
       } = request.body;
+
       if (libDayjs(starts_at).isAfter(libDayjs(ends_at))) {
         throw new Error("Start date cannot be after end date");
       }
+
       if (libDayjs(starts_at).isBefore(libDayjs())) {
         throw new Error("Start date cannot be in the past");
       }
