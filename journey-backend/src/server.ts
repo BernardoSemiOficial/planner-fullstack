@@ -4,6 +4,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { confirmParticipant } from "./routes/confirm-participant";
 import { confirmTrip } from "./routes/confirm-trip";
 import { createTrip } from "./routes/create-trip";
 const app = fastify();
@@ -17,6 +18,7 @@ app.setSerializerCompiler(serializerCompiler);
 
 app.register(createTrip);
 app.register(confirmTrip);
+app.register(confirmParticipant);
 
 app.listen({ port }).then(() => {
   console.log(`Server listening at http://localhost:${port}`);
