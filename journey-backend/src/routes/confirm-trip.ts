@@ -3,6 +3,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
 import dayjs from "dayjs";
+import { env } from "../env";
 import { ClientError } from "../errors/client-error";
 import { EmailTemplates, sendEmail } from "../lib/nodemailer";
 import { libPrisma } from "../lib/prisma";
@@ -56,7 +57,7 @@ export async function confirmTrip(app: FastifyInstance) {
       await Promise.all([
         ...trip.participants.map(async (participant) => {
           const confirmLink = trip?.id
-            ? `http://localhost:3000/participants/${participant.id}/confirm`
+            ? `${env.API_BASE_URL}/participants/${participant.id}/confirm`
             : "";
           await sendEmail(
             EmailTemplates.ConfirmParticipant,

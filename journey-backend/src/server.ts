@@ -4,6 +4,7 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import { env } from "./env";
 import { errorHandler } from "./error-handler";
 import { confirmParticipant } from "./routes/confirm-participant";
 import { confirmTrip } from "./routes/confirm-trip";
@@ -41,6 +42,6 @@ app.register(updateTrip);
 app.register(getTripDetail);
 app.register(createInvite);
 
-app.listen({ port }).then(() => {
+app.listen({ port: env.PORT }).then(() => {
   console.log(`Server listening at http://localhost:${port}`);
 });

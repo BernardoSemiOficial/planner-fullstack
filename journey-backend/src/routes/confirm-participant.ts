@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
+import { env } from "../env";
 import { ClientError } from "../errors/client-error";
 import { libPrisma } from "../lib/prisma";
 
@@ -29,10 +30,9 @@ export async function confirmParticipant(app: FastifyInstance) {
       }
 
       if (participant.is_confirmed) {
-        throw new ClientError({
-          message: "Participant already confirmed",
-          code: 400,
-        });
+        return reply.redirect(
+          `${env.FRONT_BASE_URL}/trips/${participant.trip_id}`
+        );
       }
 
       await libPrisma.participant.update({
@@ -44,7 +44,9 @@ export async function confirmParticipant(app: FastifyInstance) {
         },
       });
 
-      return reply.status(200).send({ participantId });
+      return reply.redirect(
+        `${env.FRONT_BASE_URL}/trips/${participant.trip_id}`
+      );
     }
   );
 }

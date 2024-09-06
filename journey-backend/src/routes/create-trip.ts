@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
+import { env } from "../env";
 import { ClientError } from "../errors/client-error";
 import { libDayjs } from "../lib/dayjs";
 import { EmailTemplates, sendEmail } from "../lib/nodemailer";
@@ -70,7 +71,7 @@ export async function createTrip(app: FastifyInstance) {
       });
 
       const confirmLink = trip?.id
-        ? `http://localhost:3000/trips/${trip.id}/confirm`
+        ? `${env.API_BASE_URL}/trips/${trip.id}/confirm`
         : "";
       const startsAt = libDayjs(starts_at).format("LL");
       const endsAt = libDayjs(ends_at).format("LL");

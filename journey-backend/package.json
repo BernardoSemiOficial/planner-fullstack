@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "server:build": "tsc",
-    "server:watch": "tsx --watch src/server.ts",
+    "server:watch": "tsx --watch --env-file .env src/server.ts",
     "prisma:studio": "prisma studio",
     "prisma:migrate": "prisma migrate dev"
   },

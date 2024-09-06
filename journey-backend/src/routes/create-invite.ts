@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
+import { env } from "../env";
 import { ClientError } from "../errors/client-error";
 import { libDayjs } from "../lib/dayjs";
 import { EmailTemplates, sendEmail } from "../lib/nodemailer";
@@ -53,7 +54,7 @@ export async function createInvite(app: FastifyInstance) {
       await Promise.all([
         ...participants.map(async (participant) => {
           const confirmLink = trip?.id
-            ? `http://localhost:3000/participants/${participant.id}/confirm`
+            ? `${env.API_BASE_URL}/participants/${participant.id}/confirm`
             : "";
           await sendEmail(
             EmailTemplates.ConfirmParticipant,
