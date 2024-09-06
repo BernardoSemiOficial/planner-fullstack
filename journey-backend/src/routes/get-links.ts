@@ -26,7 +26,7 @@ export async function getLinks(app: FastifyInstance) {
         return reply.status(404).send({ error: "Trip not found" });
       }
 
-      return reply.status(201).send(trip.links);
+      return reply.status(200).send(trip.links);
     }
   );
 }

@@ -49,7 +49,7 @@ export async function getActivities(app: FastifyInstance) {
         };
       });
 
-      return reply.status(201).send(activitiesFormatted);
+      return reply.status(200).send(activitiesFormatted);
     }
   );
 }
