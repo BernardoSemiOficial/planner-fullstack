@@ -55,7 +55,7 @@ export async function confirmTrip(app: FastifyInstance) {
       await Promise.all([
         ...trip.participants.map(async (participant) => {
           const confirmLink = trip?.id
-            ? `http://localhost:3000/trips/${trip.id}/participant/${participant.id}/confirm`
+            ? `http://localhost:3000/participants/${participant.id}/confirm`
             : "";
           await sendEmail(
             EmailTemplates.ConfirmParticipant,
