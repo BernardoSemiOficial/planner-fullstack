@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
+import { ClientError } from "../errors/client-error";
 import { libDayjs } from "../lib/dayjs";
 import { libPrisma } from "../lib/prisma";
 
@@ -28,19 +29,21 @@ export async function createActivity(app: FastifyInstance) {
       });
 
       if (!trip) {
-        return reply.status(404).send({ error: "Trip not found" });
+        throw new ClientError({ message: "Trip not found", code: 404 });
       }
 
       if (libDayjs(occurs_at).isAfter(libDayjs(trip.ends_at))) {
-        return reply
-          .status(400)
-          .send({ error: "Start date cannot be after trip end date" });
+        throw new ClientError({
+          message: "Start date cannot be after trip end date",
+          code: 400,
+        });
       }
 
       if (libDayjs(occurs_at).isBefore(trip.starts_at)) {
-        return reply
-          .status(400)
-          .send({ error: "Start date cannot be before trip start date" });
+        throw new ClientError({
+          message: "Start date cannot be before trip start date",
+          code: 400,
+        });
       }
 
       const activity = await libPrisma.activity.create({

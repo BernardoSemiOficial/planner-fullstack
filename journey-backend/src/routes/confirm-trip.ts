@@ -3,6 +3,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
 import dayjs from "dayjs";
+import { ClientError } from "../errors/client-error";
 import { EmailTemplates, sendEmail } from "../lib/nodemailer";
 import { libPrisma } from "../lib/prisma";
 
@@ -33,11 +34,11 @@ export async function confirmTrip(app: FastifyInstance) {
       });
 
       if (!trip) {
-        return reply.status(404).send({ message: "Trip not found" });
+        throw new ClientError({ message: "Trip not found", code: 404 });
       }
 
       if (trip.is_confirmed) {
-        return reply.status(400).send({ message: "Trip already confirmed" });
+        throw new ClientError({ message: "Trip already confirmed", code: 400 });
       }
 
       await libPrisma.trip.update({

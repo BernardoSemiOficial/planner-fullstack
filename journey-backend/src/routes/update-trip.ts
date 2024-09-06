@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
+import { ClientError } from "../errors/client-error";
 import { libDayjs } from "../lib/dayjs";
 import { libPrisma } from "../lib/prisma";
 
@@ -25,11 +26,17 @@ export async function updateTrip(app: FastifyInstance) {
       const { starts_at, ends_at, destination } = request.body;
 
       if (libDayjs(starts_at).isAfter(libDayjs(ends_at))) {
-        throw new Error("Start date cannot be after end date");
+        throw new ClientError({
+          message: "Start date cannot be after end date",
+          code: 400,
+        });
       }
 
       if (libDayjs(starts_at).isBefore(libDayjs())) {
-        throw new Error("Start date cannot be in the past");
+        throw new ClientError({
+          message: "Start date cannot be in the past",
+          code: 400,
+        });
       }
 
       const trip = await libPrisma.trip.findUnique({
@@ -37,7 +44,7 @@ export async function updateTrip(app: FastifyInstance) {
       });
 
       if (!trip) {
-        return reply.status(404).send({ error: "Trip not found" });
+        throw new ClientError({ message: "Trip not found", code: 404 });
       }
 
       const tripUpdated = await libPrisma.trip.update({

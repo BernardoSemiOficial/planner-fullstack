@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
+import { ClientError } from "../errors/client-error";
 import { libDayjs } from "../lib/dayjs";
 import { EmailTemplates, sendEmail } from "../lib/nodemailer";
 import { libPrisma } from "../lib/prisma";
@@ -28,7 +29,7 @@ export async function createInvite(app: FastifyInstance) {
       });
 
       if (!trip) {
-        return reply.status(404).send({ error: "Trip not found" });
+        throw new ClientError({ message: "Trip not found", code: 404 });
       }
 
       const participantsFormatted = emails_to_invite.map((email) => ({
